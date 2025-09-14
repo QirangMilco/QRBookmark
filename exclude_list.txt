@@ -8,3 +8,6 @@ build
 .gitignore
 tmp_build
 exclude_list.txt
+.trae
+REMOVED_LOGIN_AND_CLOUD_SYNC.md
+Note.md

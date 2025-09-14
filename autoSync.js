@@ -5,8 +5,6 @@
 class AutoSyncManager {
     // WebDAV同步的闹钟名称
     static WEBDAV_ALARM_NAME = 'webdav_auto_sync';
-    // 云同步闹钟名称
-    static CLOUD_ALARM_NAME = 'cloud_auto_sync';
     
     // 同步状态标志
     static isSyncing = false;
@@ -14,7 +12,6 @@ class AutoSyncManager {
     
     // 预定同步的防抖定时器和延迟时间
     static scheduledWebdavSyncDebounceTimer = null;
-    static scheduledCloudSyncDebounceTimer = null;
     static SCHEDULED_SYNC_DEBOUNCE_DELAY = 30000; // 30秒
     
     // 闹钟日志相关配置
@@ -29,9 +26,8 @@ class AutoSyncManager {
         try {
             logger.info('初始化自动同步系统');
             
-            // 为不同的同步服务设置闹钟
+            // 为WebDAV同步设置闹钟
             await this.setupWebDAVSync();
-            await this.setupCloudSync();
             
             // 监听存储变化事件，以便在配置更改时更新同步设置
             this.setupStorageListener();
@@ -59,19 +55,6 @@ class AutoSyncManager {
             await this.updateWebDAVSyncAlarm(config);
         } catch (error) {
             logger.error('设置WebDAV同步失败:', error);
-        }
-    }
-    
-    /**
-     * 设置云同步闹钟
-     */
-    static async setupCloudSync() {
-        try {
-            // 获取云同步配置
-            const config = await SyncSettingsManager.getServiceConfig('cloud');
-            await this.updateCloudSyncAlarm(config);
-        } catch (error) {
-            logger.error('设置云同步失败:', error);
         }
     }
     
@@ -136,86 +119,6 @@ class AutoSyncManager {
     }
     
     /**
-     * 更新云同步闹钟
-     * @param {Object} config - 云同步配置
-     */
-    static async updateCloudSyncAlarm(config) {
-        // 获取当前闹钟
-        const alarm = await chrome.alarms.get(this.CLOUD_ALARM_NAME);
-        
-        // 如果未开启自动同步，则直接返回
-        if (!config.autoSync) {
-            logger.debug('云同步自动同步已关闭');
-            await chrome.alarms.clear(this.CLOUD_ALARM_NAME);
-            return;
-        }
-        
-        // 验证配置是否有效
-        const isValid = await this.validateCloudConfig();
-        if (!isValid) {
-            logger.debug('云同步配置无效，不创建自动同步闹钟');
-            await chrome.alarms.clear(this.CLOUD_ALARM_NAME);
-            return;
-        }
-        
-        // 固定同步间隔（分钟）- 8小时 = 480分钟
-        const intervalMinutes = 480;
-        
-        if (alarm && alarm.periodInMinutes === intervalMinutes) {
-            logger.debug('云同步自动同步闹钟已存在，且间隔相同，不重复创建');
-            await this.addAlarmLog({
-                type: 'alarm',
-                action: 'exists',
-                alarmName: this.CLOUD_ALARM_NAME,
-                periodInMinutes: intervalMinutes,
-                scheduledTime: new Date(alarm.scheduledTime).toLocaleString(),
-            });
-            return;
-        }
-
-        // 清除已存在的闹钟
-        await chrome.alarms.clear(this.CLOUD_ALARM_NAME);
-        
-        // 创建闹钟
-        await chrome.alarms.create(this.CLOUD_ALARM_NAME, {
-            // 延迟2分钟后首次执行，避免启动时立即同步，并与WebDAV同步错开时间
-            delayInMinutes: 2,
-            // 设置重复间隔
-            periodInMinutes: intervalMinutes
-        });
-        
-        await this.addAlarmLog({
-            type: 'alarm',
-            action: 'create',
-            alarmName: this.CLOUD_ALARM_NAME,
-            periodInMinutes: intervalMinutes,
-            delayInMinutes: 2,
-            nextFireTime: Date.now() + 120000 // 2分钟后
-        });
-        
-        logger.info(`云同步自动同步已开启，间隔: ${intervalMinutes} 分钟（8小时）`);
-    }
-    
-    /**
-     * 验证云同步配置是否有效
-     * @returns {Promise<boolean>} 配置是否有效
-     */
-    static async validateCloudConfig() {
-        try {
-            // 检查是否已登录
-            const {valid} = await validateToken();
-            if (!valid) {
-                return false;
-            }
-            
-            return true;
-        } catch (error) {
-            logger.error('验证云同步配置失败:', error);
-            return false;
-        }
-    }
-    
-    /**
      * 设置存储监听器
      * 当同步配置变化时，更新同步设置
      */
@@ -230,11 +133,6 @@ class AutoSyncManager {
                 if (newConfig && newConfig.webdav) {
                     logger.debug('检测到WebDAV配置变化，更新自动同步设置');
                     this.updateWebDAVSyncAlarm(newConfig.webdav);
-                }
-                
-                if (newConfig && newConfig.cloud) {
-                    logger.debug('检测到云同步配置变化，更新自动同步设置');
-                    this.updateCloudSyncAlarm(newConfig.cloud);
                 }
             }
         });
@@ -282,34 +180,6 @@ class AutoSyncManager {
                 });
             }
         }
-        // 处理云同步闹钟
-        else if (alarm.name === this.CLOUD_ALARM_NAME) {
-            try {
-                logger.debug('云同步自动同步闹钟触发');
-                
-                const result = await this.executeCloudSync();
-                
-                // 记录同步结果日志
-                await this.addAlarmLog({
-                    type: 'sync',
-                    alarmName: alarm.name,
-                    result: result.success ? 'success' : result.error
-                });
-                
-                if (!result.success) {
-                    logger.error(`云同步自动同步失败: ${result.error}`);
-                }
-            } catch (error) {
-                logger.error('执行云同步自动同步失败:', error);
-                
-                // 记录同步错误日志
-                await this.addAlarmLog({
-                    type: 'sync',
-                    alarmName: alarm.name,
-                    result: error.message
-                });
-            }
-        }
     }
     
     /**
@@ -320,7 +190,6 @@ class AutoSyncManager {
      */
     static async handleScheduledSync(data = {}) {
         await this.scheduleWebdavSync(data);
-        await this.scheduleCloudSync(data);
     }
 
     static async scheduleWebdavSync(data = {}) {
@@ -352,48 +221,6 @@ class AutoSyncManager {
             }, this.SCHEDULED_SYNC_DEBOUNCE_DELAY);
         } catch (error) {
             logger.error('处理webdav预定同步失败:', error);
-            throw error;
-        }
-    }
-
-    static async scheduleCloudSync(data = {}) {
-        if (data.reason !== ScheduleSyncReason.BOOKMARKS) {
-            return;
-        }
-
-        try {
-            const autoSyncEnabled = await SyncSettingsManager.isAutoSyncEnabled('cloud');
-            if (!autoSyncEnabled) {
-                logger.debug('cloud 自动同步已关闭');
-                return;
-            }
-
-            const {valid} = await validateToken();
-            if (!valid) {
-                return;
-            }
-
-            // 使用防抖机制避免频繁同步
-            if (this.scheduledCloudSyncDebounceTimer) {
-                clearTimeout(this.scheduledCloudSyncDebounceTimer);
-            }
-            
-            const reason = data.reason || '未指定原因';
-            logger.debug(`cloud 预定同步请求 (${reason})，将在30秒后触发同步`);
-            
-            this.scheduledCloudSyncDebounceTimer = setTimeout(async () => {
-                try {
-                    logger.debug(`cloud 预定同步触发 (${reason})`);
-                    const result = await this.executeCloudSync();
-                    if (!result.success) {
-                        logger.error(`cloud 预定同步失败 (${reason}): ${result.error}`);
-                    }
-                } catch (error) {
-                    logger.error('执行cloud预定同步失败:', error);
-                }
-            }, this.SCHEDULED_SYNC_DEBOUNCE_DELAY); 
-        } catch (error) {
-            logger.error('处理cloud预定同步失败:', error);
             throw error;
         }
     }
@@ -487,54 +314,6 @@ class AutoSyncManager {
             await this.unlockSync();
         }
     }
-
-    static async executeCloudSync() {
-        const isLocked = await this.lockSync('cloud');
-        if (!isLocked) {
-            return {
-                success: false,
-                error: `同步操作正在进行中，请稍后再试`
-            };
-        }
-        try {
-            logger.info('开始执行云同步');
-
-            const valid = await this.validateCloudConfig();
-            if (!valid) {
-                return {
-                    success: false,
-                    error: '云同步配置无效，请先完成配置'
-                };
-            }
-            
-            const result = await syncManager.startSync();
-
-            // 更新同步状态
-            await SyncStatusManager.updateStatus('cloud', result);
-
-            logger.info('云同步完成', result);
-            return {
-                success: true,
-                result: result
-            }
-        } catch (error) {
-            logger.error('执行云同步失败:', error);
-
-            // 更新同步状态为失败
-            const status = await SyncStatusManager.getServiceStatus('cloud');
-            await SyncStatusManager.updateStatus('cloud', {
-                ...status,
-                lastSync: new Date().getTime(),
-                lastSyncResult: error.message
-            });
-            return {
-                success: false,
-                error: error.message
-            }
-        } finally {
-            await this.unlockSync();
-        }
-    }
     
     /**
      * 获取闹钟日志
@@ -603,4 +382,4 @@ class AutoSyncManager {
             logger.error('清除闹钟日志失败:', error);
         }
     }
-} 
+}

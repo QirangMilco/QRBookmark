@@ -55,13 +55,50 @@
     }   
 }
 
+/* 浮窗模式检测和样式 */
 body {
-    width: 100%;
-    height: 100vh;
+    width: 380px;  /* 浮窗模式的默认宽度 */
+    min-height: 500px;
+    max-height: 600px;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
     background: var(--bg-primary);
+    height: auto;
+}
+
+/* 侧边栏模式样式 - 当宽度大于800px时认为是侧边栏 */
+@media (min-width: 801px) {
+    body {
+        width: 100%;
+        height: 100vh;
+        max-height: none;
+    }
+}
+
+.container {
+    width: 380px;
+    max-height: 600px;
+    height: 100%;
+}
+
+.main-content {
+    max-height: calc(600px - 48px);
+    height: calc(100% - 48px);
+}
+
+/* 侧边栏模式下的容器样式 */
+@media (min-width: 801px) {
+    .container {
+        width: 100%;
+        max-height: none;
+        height: 100%;
+    }
+    
+    .main-content {
+        max-height: none;
+        height: calc(100vh - 48px);
+    }
 }
 
 .container {

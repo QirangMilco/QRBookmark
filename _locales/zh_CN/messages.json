@@ -1,10 +1,10 @@
 {
     "extName": {
-        "message": "Smart Bookmark",
+        "message": "QR Bookmark",
         "description": "扩展名称"
     },
     "extDescription": {
-        "message": "智能书签管家，AI驱动，自动生成标签，语义化搜索，让整理和查找变得更简单。",
+        "message": "从Smart Bookmark修改而来，是QRHome的浏览器插件。智能书签管家，AI驱动，自动生成标签，语义化搜索，让整理和查找变得更简单。",
         "description": "扩展描述"
     },
     "cmd_quick_search": {
@@ -14,6 +14,10 @@
     "cmd_quick_save": {
         "message": "保存书签",
         "description": "快捷保存命令"
+    },
+    "context_menu_quick_save": {
+        "message": "快速保存到QRBookmark",
+        "description": "右键菜单快速保存文本"
     },
     "ui_button_save": {
         "message": "保存",
@@ -133,4 +137,4 @@
         "message": "你是一个专业的网页内容分析专家，擅长提取文章的核心主题并生成准确的标签。",
         "description": "生成标签系统提示词"
     }
-} 
+}

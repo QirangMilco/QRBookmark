@@ -15,7 +15,7 @@
                 <img src="icons/saved_128.png" alt="Logo">
             </div>
             <div class="app-info">
-                <div class="app-name">Smart Bookmark</div>
+                <div class="app-name">QR Bookmark</div>
                 <div class="app-version">v1.0.0</div>
             </div>
         </div>
@@ -49,7 +49,7 @@
                 <span>关于</span>
             </a>
         </nav>
-        <div class="sidebar-footer">
+        <!-- <div class="sidebar-footer">
             <div class="footer-links">
                 <a href="#" class="footer-link" id="privacy-policy-link">
                     <i class="icon-policy"></i>
@@ -64,7 +64,7 @@
                     <span>提交反馈</span>
                 </a>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- 主内容区域 -->
@@ -74,37 +74,7 @@
             <div class="settings-section" id="overview-section">
                 <h2>基本设置</h2>
                 
-                <!-- 添加登录状态卡片 -->
-                <div class="login-status-card">
-                    <div class="status-header">
-                        <h3>账号状态</h3>
-                    </div>
-                    <!-- 登录状态模板 -->
-                    <template id="logged-in-template">
-                        <div class="status-box logged-in">
-                            当前登录用户: <span class="username"></span>
-                        </div>
-                        <div class="status-actions">
-                            <button class="logout-btn">退出登录</button>
-                        </div>
-                    </template>
-                    
-                    <!-- 未登录状态模板 -->
-                    <template id="logged-out-template">
-                        <div class="status-box logged-out">
-                            您尚未登录，请先登录以使用书签同步功能
-                        </div>
-                        <div class="status-actions">
-                            <a class="login-btn" target="_blank">去登录</a>
-                        </div>
-                    </template>
-                    <div id="loginStatus" class="status-content">
-                        <!-- 状态内容将由 JavaScript 动态填充 -->
-                    </div>
-                    <div id="actionButtons" class="status-actions">
-                        <!-- 操作按钮将由 JavaScript 动态填充 -->
-                    </div>
-                </div>
+
                 
                 <!-- 修改搜索设置部分 -->
                 <div class="search-settings-card">
@@ -778,64 +748,6 @@
                 </div>
                 
                 <div class="sync-services-container">
-                    <!-- 云同步服务卡片 -->
-                    <div class="sync-service-card" id="cloud-sync-card">
-                        <div class="sync-service-header">
-                            <div class="sync-service-top">
-                                <div class="sync-service-name">
-                                    云同步
-                                    <div class="login-status">
-                                        <a href="#" class="login-link">去登录</a>
-                                        <svg class="login-status-icon" viewBox="0 0 24 24" width="16" height="16">
-                                            <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-                                        </svg>
-                                        <span class="login-status-text">已登录</span>
-                                    </div>
-                                </div>
-                                <div class="sync-service-actions">
-                                    <label class="switch-label">
-                                        <div class="switch-container" title="开启/关闭同步">
-                                            <input type="checkbox" class="sync-toggle">
-                                            <span class="switch-slider"></span>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="sync-service-status">
-                                <span class="sync-status-text">上次同步: 从未同步</span>
-                                <span class="sync-status-icon success">
-                                    <svg viewBox="0 0 24 24" width="16" height="16">
-                                        <path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
-                                    </svg>
-                                </span>
-                                <span class="sync-status-icon error">
-                                    <svg viewBox="0 0 24 24" width="16" height="16">
-                                        <path fill="currentColor" d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-                                    </svg>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="sync-service-content">
-                            <div class="sync-service-description">
-                                官方提供的云同步服务，目前只支持同步书签数据
-                            </div>
-                            <div class="sync-service-buttons">
-                                <button class="secondary-btn sync-settings-btn">
-                                    <svg viewBox="0 0 24 24" width="16" height="16">
-                                        <path fill="currentColor" d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
-                                    </svg>
-                                    设置
-                                </button>
-                                <button class="primary-btn sync-now-btn">
-                                    <svg viewBox="0 0 24 24" width="16" height="16">
-                                        <path fill="currentColor" d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20V23L16,19L12,15M12,4V1L8,5L12,9V6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12A8,8 0 0,0 12,4Z"/>
-                                    </svg>
-                                    立即同步
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- WebDAV同步服务卡片 -->
                     <div class="sync-service-card" id="webdav-sync-card">
                         <div class="sync-service-header">
@@ -898,10 +810,10 @@
                     <!-- Logo和版本信息 -->
                     <div class="about-header">
                         <div class="about-logo">
-                            <img src="icons/saved_128.png" alt="Smart Bookmark Logo">
+                            <img src="icons/saved_128.png" alt="QR Bookmark Logo">
                         </div>
                         <div class="about-info">
-                            <h1>Smart Bookmark</h1>
+                            <h1>QR Bookmark</h1>
                             <div class="version-info">
                                 <span class="version">版本 <span id="current-version"></span></span>
                                 <span class="update-date">最后更新：<span id="last-update-date"></span></span>
@@ -914,7 +826,7 @@
                         <h3>
                             产品简介
                         </h3>
-                        <p>Smart Bookmark 是一款智能书签管理工具，它能帮助你更高效地管理和搜索书签。通过AI技术，它可以自动分析网页内容，生成标签，让你的书签管理更轻松。</p>
+                        <p>QR Bookmark 基于Smart Bookmark修改而来，是QRHome的浏览器插件，它能帮助你更高效地管理和搜索书签。通过AI技术，它可以自动分析网页内容，生成标签，让你的书签管理更轻松。</p>
                     </div>
                     
                     <!-- 项目信息 -->
@@ -927,9 +839,15 @@
                                 <svg viewBox="0 0 24 24" width="20" height="20">
                                     <path fill="currentColor" d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/>
                                 </svg>
-                                <span>GitHub</span>
+                                <span>SmartBookmark</span>
                             </a>
-                            <a href="mailto:zhw18868119485@gmail.com" class="project-link">
+                            <a href="https://github.com/QirangMilco/QRBookmark" target="_blank" class="project-link">
+                                <svg viewBox="0 0 24 24" width="20" height="20">
+                                    <path fill="currentColor" d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/>
+                                </svg>
+                                <span>QRBookmark</span>
+                            </a>
+                            <!-- <a href="mailto:zhw18868119485@gmail.com" class="project-link">
                                 <svg viewBox="0 0 24 24" width="20" height="20">
                                     <path fill="currentColor" d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"/>
                                 </svg>
@@ -940,7 +858,7 @@
                                     <path fill="currentColor" d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
                                 </svg>
                                 <span>评分反馈</span>
-                            </a>
+                            </a> -->
                         </div>
                     </div>
                 </div>
@@ -1408,57 +1326,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 云同步配置对话框 -->
-        <div id="cloud-config-dialog" class="dialog">
-            <div class="dialog-content">
-                <div class="dialog-header">
-                    <h3>云同步设置</h3>
-                    <div class="dialog-header-actions">
-                        <button class="close-dialog-btn">
-                            <svg viewBox="0 0 24 24" width="24" height="24">
-                                <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="dialog-body">
-                    <!-- 同步设置 -->
-                    <div class="config-section">
-                        <h4>同步选项</h4>
-                        <div class="form-group">
-                            <label class="switch-label">
-                                <span class="switch-text sync-strategy-label">自动同步</span>
-                                <div class="switch-container">
-                                    <input type="checkbox" id="cloud-auto-sync" checked>
-                                    <span class="switch-slider"></span>
-                                </div>
-                            </label>
-                            <div class="help-text">开启后，书签数据会定期同步到云端，以及在书签发生变更时自动同步</div>
-                        </div>
-                    </div>
-
-                    <!-- 云同步管理 -->
-                    <div class="config-section">
-                        <h4>同步管理</h4>
-                        <div class="form-actions">
-                            <label class="form-group-label sync-strategy-label">从头开始同步</label>
-                            <div class="help-text">重置本地同步缓存，下次同步时不会删除任何数据只是将服务器和本地书签合并在一起</div>
-                            <button class="secondary-btn reset-cloud-cache-btn">
-                                <svg viewBox="0 0 24 24" width="16" height="16">
-                                    <path fill="currentColor" d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
-                                </svg>
-                                <span>重置缓存</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="dialog-footer">
-                    <button class="secondary-btn cancel-cloud-btn">取消</button>
-                    <button class="primary-btn save-cloud-btn">保存</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="consts.js"></script>
@@ -1483,4 +1350,4 @@
     <script src="search.js"></script>
     <script src="settings.js"></script>
 </body>
-</html> 
+</html>

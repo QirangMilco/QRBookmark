@@ -1,6 +1,6 @@
 {
     "extName": {
-        "message": "Smart Bookmark"
+        "message": "QR Bookmark"
     },
     "extDescription": {
         "message": "AI-powered bookmark manager with automatic tag generation and semantic search—eliminate tedious management."
@@ -10,6 +10,9 @@
     },
     "cmd_quick_save": {
         "message": "Save Bookmark"
+    },
+    "context_menu_quick_save": {
+        "message": "Quick Save to QRBookmark"
     },
     "ui_button_save": {
         "message": "Save"

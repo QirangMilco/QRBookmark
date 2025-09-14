@@ -45,8 +45,6 @@ class OverviewSettingsTab extends BaseSettingsTab {
     constructor() {
         super();
         this.section = document.getElementById('overview-section');
-        this.statusDiv = document.getElementById('loginStatus');
-        this.actionDiv = document.getElementById('actionButtons');
         
         // 添加搜索设置相关元素
         this.maxSearchResults = document.getElementById('max-search-results');
@@ -62,13 +60,7 @@ class OverviewSettingsTab extends BaseSettingsTab {
         this.quickSearchShortcut = document.getElementById('quickSearch-shortcut');
         this.editShortcutsBtn = document.getElementById('edit-shortcuts-btn');
         
-        // 获取模板
-        this.loggedInTemplate = document.getElementById('logged-in-template');
-        this.loggedOutTemplate = document.getElementById('logged-out-template');
-        
         // 绑定方法到实例
-        this.checkLoginStatus = this.checkLoginStatus.bind(this);
-        this.handleLogout = this.handleLogout.bind(this);
         this.handleMaxSearchResultsChange = this.handleMaxSearchResultsChange.bind(this);
         this.handleOmniboxSearchLimitChange = this.handleOmniboxSearchLimitChange.bind(this);
         this.handleSitesDisplayChange = this.handleSitesDisplayChange.bind(this);
@@ -80,7 +72,6 @@ class OverviewSettingsTab extends BaseSettingsTab {
     async initialize() {
         await this.initializeSearchSettings();
         await this.initializeThemeSettings();
-        await this.checkLoginStatus();
         await this.initializeShortcuts();
         this.setupEventListeners();
     }
@@ -154,64 +145,6 @@ class OverviewSettingsTab extends BaseSettingsTab {
         this.sitesDisplayCount.addEventListener('change', this.handleSitesDisplayCountChange);
     }
 
-    async checkLoginStatus() {
-        logger.debug('开始检查登录状态', Date.now()/1000);
-        const {valid, user} = await validateToken();
-        if (!valid) {
-            this.showLoggedOutState();
-            return;
-        }
-        this.showLoggedInState(user.email);
-        logger.debug('检查登录状态完成', Date.now()/1000);
-    }
-
-    showLoggedInState(username) {
-        // 克隆模板
-        const content = this.loggedInTemplate.content.cloneNode(true);
-        
-        // 设置用户名
-        content.querySelector('.username').textContent = username;
-        
-        // 添加登出按钮事件监听
-        const logoutBtn = content.querySelector('.logout-btn');
-        logoutBtn.addEventListener('click', this.handleLogout);
-        
-        // 清空并添加新内容
-        this.statusDiv.innerHTML = '';
-        this.actionDiv.innerHTML = '';
-        this.statusDiv.appendChild(content.querySelector('.status-box'));
-        this.actionDiv.appendChild(content.querySelector('.status-actions'));
-    }
-
-    showLoggedOutState() {
-        // 克隆模板
-        const content = this.loggedOutTemplate.content.cloneNode(true);
-        
-        // 设置登录链接
-        const loginLink = content.querySelector('.login-btn');
-        // 移除 href 属性，改用点击事件处理
-        loginLink.removeAttribute('href');
-        loginLink.addEventListener('click', () => {
-            const returnUrl = encodeURIComponent(chrome.runtime.getURL('settings.html'));
-            const loginUrl = `${SERVER_URL}/login?return_url=${returnUrl}`;
-            
-            // 使用 window.open() 打开登录页面
-            const loginWindow = window.open(loginUrl, '_blank');
-            
-            // 可以存储引用以便后续使用
-            this.loginWindow = loginWindow;
-        });
-        
-        // 清空并添加新内容
-        this.statusDiv.innerHTML = '';
-        this.actionDiv.innerHTML = '';
-        this.statusDiv.appendChild(content.querySelector('.status-box'));
-        this.actionDiv.appendChild(content.querySelector('.status-actions'));
-    }
-
-    async handleLogout() {
-        await LocalStorageMgr.remove(['token']);
-    }
 
 
     async handleMaxSearchResultsChange() {
@@ -3038,25 +2971,15 @@ class SyncSettingsTab extends BaseSettingsTab {
         this.webdavSyncCard = document.getElementById('webdav-sync-card');
         this.webdavDialog = document.getElementById('webdav-config-dialog');
         this.webdavService = new WebDAVSyncService(this.webdavSyncCard, this.webdavDialog);
-        
-        // 云同步服务
-        this.cloudSyncCard = document.getElementById('cloud-sync-card');
-        this.cloudDialog = document.getElementById('cloud-config-dialog');
-        this.cloudService = new CloudSyncService(this.cloudSyncCard, this.cloudDialog);
+    
     }
 
     async initialize() {
         await this.webdavService.initialize();
-        await this.cloudService.initialize();
     }
     
     handleEscKey(e) {
         this.webdavService.hideConfigDialog();
-        this.cloudService.hideConfigDialog();
-    }
-
-    checkLoginStatus() {
-        this.cloudService.checkLoginStatus();
     }
 
     cleanup() {
@@ -3128,7 +3051,6 @@ class SettingsUI {
                 // 监听API Keys的变化
                 if (changes['token']) {
                     logger.info('token changed');
-                    this.checkLoginStatus();
                 }
             }
         });
@@ -3184,13 +3106,6 @@ class SettingsUI {
         }
     }
 
-    checkLoginStatus() {
-        Object.values(this.tabs).forEach(tab => {
-            if (tab.checkLoginStatus) {
-                tab.checkLoginStatus();
-            }
-        });
-    }
 
     cleanup() {
         Object.values(this.tabs).forEach(tab => tab.cleanup());

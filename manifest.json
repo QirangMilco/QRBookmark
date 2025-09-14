@@ -17,8 +17,8 @@
             "48": "icons/saved_48.png",
             "128": "icons/saved_128.png"
         },
-        "default_title": "Smart Bookmark",
-        "default_popup": "quickSave.html"
+        "default_title": "QR Bookmark",
+        "default_popup": "popup.html"
     },
     "background": {
         "service_worker": "background.js"
@@ -27,6 +27,7 @@
         "default_path": "popup.html"
     },
     "options_page": "settings.html",
+    "homepage_url": "https://github.com/QirangMilco/QRBookmark",
     "permissions": [
         "tabs",
         "storage",
@@ -36,7 +37,8 @@
         "bookmarks",
         "unlimitedStorage",
         "favicon",
-        "alarms"
+        "alarms",
+        "contextMenus"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -53,7 +55,7 @@
         }
     ],
     "omnibox": {
-        "keyword": "sb"
+        "keyword": "qr"
     },
     "commands": {
         "quick-search": {

@@ -60,21 +60,61 @@ logger.info("background.js init");
 // 调用初始化函数
 initializeExtension();
 
-// 设置侧边栏行为   
+// 设置侧边栏行为 - 禁用点击图标时打开侧边栏，改为使用浮窗
 chrome.sidePanel
-  .setPanelBehavior({ openPanelOnActionClick: true })
+  .setPanelBehavior({ openPanelOnActionClick: false })
   .catch((error) => logger.error(error));
+
+// 创建右键菜单
+function createContextMenus() {
+    // 移除可能已存在的菜单项，避免重复创建
+    chrome.contextMenus.removeAll(() => {
+        // 创建"快速保存"右键菜单项
+        chrome.contextMenus.create({
+            id: "quick-save-context",
+            title: chrome.i18n.getMessage("context_menu_quick_save") || "快速保存到QRBookmark",
+            contexts: ["page", "selection", "link", "image", "video"],
+            documentUrlPatterns: ["https://*/*", "http://*/*"]
+        });
+        
+        logger.info("右键菜单已创建");
+    });
+}
+
+// 初始化时创建右键菜单
+createContextMenus();
+
+// 监听右键菜单点击事件
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (info.menuItemId === "quick-save-context") {
+        logger.debug("右键菜单点击: 快速保存", { info, tab });
+        
+        try {
+            // 确保当前窗口是活动的
+            await chrome.windows.update(tab.windowId, { focused: true });
+            handleRuntimeError();
+            
+            // 打开快速保存弹出窗口
+            await chrome.action.setPopup({popup: 'quickSave.html'});
+            await chrome.action.openPopup({windowId: tab.windowId});
+            
+            logger.info("通过右键菜单打开快速保存窗口成功");
+        } catch (error) {
+            logger.error("通过右键菜单打开快速保存窗口失败:", error);
+        }
+    }
+});
 
 // 监听插件首次安装时的事件
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
     if (reason === 'install') {
-        logger.info("Smart Bookmark 插件已成功安装！");
+        logger.info("QR Bookmark 插件已成功安装！");
         // 打开介绍页
         chrome.tabs.create({
             url: chrome.runtime.getURL('intro.html')
         });
     } else if (reason === 'update') {
-        logger.info("Smart Bookmark 插件已成功更新！");
+        logger.info("QR Bookmark 插件已成功更新！");
         // 打开介绍页
         const introCompleted = await LocalStorageMgr.get('intro-completed');
         if (!introCompleted) {
@@ -120,18 +160,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 sendResponse({ success: false, error: error.message });
             });
         return true;
-    } else if (message.type === MessageType.EXECUTE_CLOUD_SYNC) {
-        // 执行云同步
-        AutoSyncManager.executeCloudSync()
-            .then(result => {
-                sendResponse({ success: result.success, result: result.result, error: result.error });
-            })
-            .catch(error => {
-                logger.error('云同步失败:', error);
-                sendResponse({ success: false, error: error.message });
-            });
-
-        return true;
     } else if (message.type === MessageType.SCHEDULE_SYNC) {
         // 预定同步请求，由数据变更触发
         AutoSyncManager.handleScheduledSync(message.data)
@@ -143,56 +171,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 sendResponse({ success: false, error: error.message });
             });
         return true;
-    } else if (message.type === MessageType.RESET_CLOUD_SYNC_CACHE) {
-        // 重置同步缓存
-        syncManager.resetSyncCache()
-            .then(() => {
-                sendResponse({ success: true });
-            }).catch(error => {
-                logger.error('重置同步缓存失败:', error);
-                sendResponse({ success: false, error: error.message });
-            });
-        return true;
     } else if (message.type === MessageType.TRIGGER_BOOKMARK_CACHE_UPDATE) {
         // 触发书签缓存更新
         LocalStorageMgr.scheduleBookmarkCacheUpdate();
-        return true;
-    }
-});
-
-// 监听来自登录页面的消息
-chrome.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
-    logger.debug("background 收到网页消息", {
-        message: message,
-        sender: sender,
-    }); 
-    if (sender.origin !== SERVER_URL) {
-        return;
-    }   
-    if (message.type === ExternalMessageType.LOGIN_SUCCESS) {
-        const { token, user } = message.data;
-        logger.debug('登录成功', {user: user});
-
-        const lastUser = await LocalStorageMgr.get('user');
-        const lastSyncVersion = await LocalStorageMgr.get('lastSyncVersion') || 0;
-        if (lastUser && lastUser.id !== user.id && lastSyncVersion > 0) {
-            // 如果用户发生变化，则需要重新同步全部书签
-            await syncManager.resetSyncCache();
-        }
-            
-        Promise.all([
-            LocalStorageMgr.set('token', token),
-            LocalStorageMgr.set('user', user)
-        ]).then(() => {
-            sendResponse({ success: true });
-        });
-            
-        // 重要：返回 true 表示我们会异步发送响应
-        return true;
-    }  else if (message.type === ExternalMessageType.CHECK_LOGIN_STATUS) {
-        const token = await LocalStorageMgr.get('token');
-        const user = await LocalStorageMgr.get('user');
-        sendResponse({ success: true, token: token, user: user });
         return true;
     }
 });

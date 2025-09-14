@@ -267,19 +267,6 @@ class SyncStatusDialog {
             
             // 检查是否有开启的同步服务
             const enabledServices = [];
-
-            // 检查云同步是否开启
-            if (config.cloud && config.cloud.autoSync) {
-                const {valid} = await validateToken();
-                if (valid) {
-                    enabledServices.push({
-                        id: 'cloud',
-                        name: '云同步',
-                        status: status.cloud || {},
-                        isSyncing: isSyncing && syncProcess.service === 'cloud'
-                    });
-                }
-            }
             
             // 检查WebDAV同步是否开启
             if (config.webdav && config.webdav.syncStrategy.autoSync) {
@@ -428,9 +415,6 @@ class SyncStatusDialog {
                 if (service.id === 'webdav') {
                     // 执行WebDAV同步
                     result = await this.executeWebDAVSync();
-                } else if (service.id === 'cloud') {
-                    // 执行云同步
-                    result = await this.executeCloudSync();
                 }
                 
                 // 显示同步结果
@@ -470,30 +454,6 @@ class SyncStatusDialog {
             });
         } catch (error) {
             logger.error('执行WebDAV同步失败:', error);
-            throw error;
-        }
-    }
-    
-    /**
-     * 执行云同步
-     * @returns {Promise<Object>} 同步结果
-     */
-    async executeCloudSync() {
-        try {
-            return new Promise((resolve, reject) => {
-                chrome.runtime.sendMessage({
-                    type: MessageType.EXECUTE_CLOUD_SYNC
-                }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        reject(new Error(chrome.runtime.lastError.message));
-                        return;
-                    }
-                    
-                    resolve(response);
-                });
-            });
-        } catch (error) {
-            logger.error('执行云同步失败:', error);
             throw error;
         }
     }
